@@ -24,9 +24,13 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+#if os(OSX)
+    import AppKit
+#elseif os(iOS)
+    import UIKit
+#endif
 
-public class DownloadTask: Task<DownloadTask> {
+public class DownloadTask: TiercelTask<DownloadTask> {
     
     private enum CodingKeys: CodingKey {
         case resumeData
@@ -108,10 +112,12 @@ public class DownloadTask: Task<DownloadTask> {
         if let fileName = fileName, !fileName.isEmpty {
             self.fileName = fileName
         }
+        #if os(iOS)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(fixDelegateMethodError),
                                                name: UIApplication.didBecomeActiveNotification,
                                                object: nil)
+        #endif
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -222,13 +228,7 @@ extension DownloadTask {
         } else {
             if let resumeData = resumeData,
                 cache.retrieveTmpFile(tmpFileName) {
-                if #available(iOS 10.2, *) {
-                    sessionTask = session?.downloadTask(withResumeData: resumeData)
-                } else if #available(iOS 10.0, *) {
-                    sessionTask = session?.correctedDownloadTask(withResumeData: resumeData)
-                } else {
-                    sessionTask = session?.downloadTask(withResumeData: resumeData)
-                }
+                sessionTask = session?.downloadTask(withResumeData: resumeData)
             } else {
                 var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
                 if let headers = headers {

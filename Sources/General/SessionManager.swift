@@ -23,8 +23,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
-
+#if os(OSX)
+import AppKit
+#elseif os(iOS)
 import UIKit
+#endif
 
 public class SessionManager {
     
@@ -749,7 +752,9 @@ extension SessionManager {
     internal func updateProgress() {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
+                #if os(iOS)
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
+                #endif
             }
         }
         progressExecuter?.execute(self)
@@ -777,7 +782,9 @@ extension SessionManager {
     internal func determineStatus(fromRunningTask: Bool) {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
+                #if os(iOS)
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                #endif
             }
         }
 

@@ -63,6 +63,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
             manager.log(.error("urlSession(_:downloadTask:didFinishDownloadingTo:)", error: TiercelError.fetchDownloadTaskFailed(url: currentURL)))
             return
         }
+        debugPrint("Tiercel - Downloaded \(location)")
         task.didFinishDownloading(task: downloadTask, to: location)
     }
     
