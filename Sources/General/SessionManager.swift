@@ -66,8 +66,8 @@ public class SessionManager {
         var isControlNetworkActivityIndicator: Bool = true
         var configuration: SessionConfiguration {
             didSet {
-                guard !shouldCreatSession else { return }
-                shouldCreatSession = true
+                guard !shouldCreateSession else { return }
+                shouldCreateSession = true
                 if status == .running {
                     if configuration.maxConcurrentTasksLimit <= oldValue.maxConcurrentTasksLimit {
                         restartTasks = runningTasks + tasks.filter { $0.status == .waiting }
@@ -81,7 +81,7 @@ public class SessionManager {
             }
         }
         var session: URLSession?
-        var shouldCreatSession: Bool = false
+        var shouldCreateSession: Bool = false
         var timer: DispatchSourceTimer?
         var status: Status = .waiting
         var tasks: [DownloadTask] = []
@@ -123,9 +123,9 @@ public class SessionManager {
         set { protectedState.write { $0.session = newValue } }
     }
     
-    private var shouldCreatSession: Bool {
-        get { protectedState.wrappedValue.shouldCreatSession }
-        set { protectedState.write { $0.shouldCreatSession = newValue } }
+    private var shouldCreateSession: Bool {
+        get { protectedState.wrappedValue.shouldCreateSession }
+        set { protectedState.write { $0.shouldCreateSession = newValue } }
     }
 
     
@@ -244,7 +244,7 @@ public class SessionManager {
                 $0.operationQueue = operationQueue
                 state.urlMapper[$0.currentURL] = $0.url
             }
-            state.shouldCreatSession = true
+            state.shouldCreateSession = true
         }
         operationQueue.sync {
             createSession()
@@ -265,7 +265,7 @@ public class SessionManager {
 
 
     private func createSession(_ completion: (() -> ())? = nil) {
-        guard shouldCreatSession else { return }
+        guard shouldCreateSession else { return }
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
         sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
@@ -285,7 +285,7 @@ public class SessionManager {
                                      delegateQueue: delegateQueue)
             $0.session = session
             $0.tasks.forEach { $0.session = session }
-            $0.shouldCreatSession = false
+            $0.shouldCreateSession = false
         }
         completion?()
     }
@@ -462,7 +462,7 @@ extension SessionManager {
     private func _start(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         task.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         didStart()
-        if !shouldCreatSession {
+        if !shouldCreateSession {
             task.download()
         } else {
             task.status = .suspended
@@ -734,7 +734,7 @@ extension SessionManager {
             status = .suspended
             executeControl()
             executeCompletion(false)
-            if shouldCreatSession {
+            if shouldCreateSession {
                 session?.invalidateAndCancel()
                 session = nil
             }
@@ -837,7 +837,7 @@ extension SessionManager {
                 return
             }
             status = .suspended
-            if shouldCreatSession {
+            if shouldCreateSession {
                 session?.invalidateAndCancel()
                 session = nil
             } else {
