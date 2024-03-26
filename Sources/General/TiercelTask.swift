@@ -135,6 +135,7 @@ public class TiercelTask<TaskType>: NSObject, Codable {
             if self is DownloadTask {
                 manager?.log(.downloadTask(newValue.rawValue, task: self as! DownloadTask))
             }
+            NotificationCenter.default.postNotification(name: DownloadTask.statusDidChangeNotification, downloadTask: self as! DownloadTask)
         }
     }
     

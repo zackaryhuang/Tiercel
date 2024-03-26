@@ -30,6 +30,7 @@ public extension DownloadTask {
 
     static let runningNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.running")
     static let didCompleteNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.didComplete")
+    static let statusDidChangeNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.statusDidChange")
  
 }
 
