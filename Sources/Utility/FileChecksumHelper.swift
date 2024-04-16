@@ -39,7 +39,7 @@ public enum FileChecksumHelper {
     public enum FileVerificationError: Error {
         case codeEmpty
         case codeMismatch(code: String)
-        case fileDoesnotExist(path: String)
+        case fileDoesNotExist(path: String)
         case readDataFailed(path: String)
     }
     
@@ -57,7 +57,7 @@ public enum FileChecksumHelper {
         }
         ioQueue.async {
             guard FileManager.default.fileExists(atPath: filePath) else {
-                completion(.failure(FileVerificationError.fileDoesnotExist(path: filePath)))
+                completion(.failure(FileVerificationError.fileDoesNotExist(path: filePath)))
                 return
             }
             let url = URL(fileURLWithPath: filePath)
@@ -97,7 +97,7 @@ extension FileChecksumHelper.FileVerificationError: LocalizedError {
             return "verification code is empty"
         case let .codeMismatch(code):
             return "verification code mismatch, code: \(code)"
-        case let .fileDoesnotExist(path):
+        case let .fileDoesNotExist(path):
             return "file does not exist, path: \(path)"
         case let .readDataFailed(path):
             return "read data failed, path: \(path)"
