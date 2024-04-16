@@ -424,7 +424,7 @@ extension DownloadTask {
                                                         }
             if verificationCode == code &&
                 verificationType == type &&
-                self.validation != .unkown {
+                self.validation != .unknown {
                 self.shouldValidateFile = false
             } else {
                 self.shouldValidateFile = true

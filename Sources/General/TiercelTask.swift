@@ -28,7 +28,7 @@ import Foundation
 
 extension TiercelTask {
     public enum Validation: Int {
-        case unkown
+        case unknown
         case correct
         case incorrect
     }
@@ -80,7 +80,7 @@ public class TiercelTask<TaskType>: NSObject, Codable {
         var verificationType: FileChecksumHelper.VerificationType = .md5
         var isRemoveCompletely: Bool = false
         var status: Status = .waiting
-        var validation: Validation = .unkown
+        var validation: Validation = .unknown
         var currentURL: URL
         var startDate: Double = 0
         var endDate: Double = 0
