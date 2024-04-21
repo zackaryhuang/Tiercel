@@ -62,17 +62,17 @@ public class TiercelTask<TaskType>: NSObject, Codable {
         case error(_ error: Error)
         case statusCode(_ statusCode: Int)
     }
-
+    
     public internal(set) weak var manager: SessionManager?
-
+    
     internal var cache: Cache
-
+    
     internal var operationQueue: DispatchQueue
-
+    
     public let url: URL
     
     public let progress: Progress = Progress()
-
+    
     internal struct State {
         var session: URLSession?
         var headers: [String: String]?
@@ -88,7 +88,7 @@ public class TiercelTask<TaskType>: NSObject, Codable {
         var fileName: String
         var timeRemaining: Int64 = 0
         var error: Error?
-
+        
         var progressExecuter: Executer<TaskType>?
         var successExecuter: Executer<TaskType>?
         var failureExecuter: Executer<TaskType>?
@@ -124,7 +124,7 @@ public class TiercelTask<TaskType>: NSObject, Codable {
         get { protectedState.wrappedValue.isRemoveCompletely }
         set { protectedState.write { $0.isRemoveCompletely = newValue } }
     }
-
+    
     public internal(set) var status: Status {
         get { protectedState.wrappedValue.status }
         set {
@@ -148,8 +148,8 @@ public class TiercelTask<TaskType>: NSObject, Codable {
         get { protectedState.wrappedValue.currentURL }
         set { protectedState.write { $0.currentURL = newValue } }
     }
-
-
+    
+    
     public internal(set) var startDate: Double {
         get { protectedState.wrappedValue.startDate }
         set { protectedState.write { $0.startDate = newValue } }
@@ -158,17 +158,17 @@ public class TiercelTask<TaskType>: NSObject, Codable {
     public var startDateString: String {
         startDate.tr.convertTimeToDateString()
     }
-
+    
     public internal(set) var endDate: Double {
-       get { protectedState.wrappedValue.endDate }
-       set { protectedState.write { $0.endDate = newValue } }
+        get { protectedState.wrappedValue.endDate }
+        set { protectedState.write { $0.endDate = newValue } }
     }
     
     public var endDateString: String {
         endDate.tr.convertTimeToDateString()
     }
-
-
+    
+    
     public internal(set) var speed: Int64 {
         get { protectedState.wrappedValue.speed }
         set { protectedState.write { $0.speed = newValue } }
@@ -177,13 +177,13 @@ public class TiercelTask<TaskType>: NSObject, Codable {
     public var speedString: String {
         speed.tr.convertSpeedToString()
     }
-
+    
     /// 默认为url的md5加上文件扩展名
     public internal(set) var fileName: String {
         get { protectedState.wrappedValue.fileName }
         set { protectedState.write { $0.fileName = newValue } }
     }
-
+    
     public internal(set) var timeRemaining: Int64 {
         get { protectedState.wrappedValue.timeRemaining }
         set { protectedState.write { $0.timeRemaining = newValue } }
@@ -192,28 +192,28 @@ public class TiercelTask<TaskType>: NSObject, Codable {
     public var timeRemainingString: String {
         timeRemaining.tr.convertTimeToString()
     }
-
+    
     public internal(set) var error: Error? {
         get { protectedState.wrappedValue.error }
         set { protectedState.write { $0.error = newValue } }
     }
-
-
+    
+    
     internal var progressExecuter: Executer<TaskType>? {
         get { protectedState.wrappedValue.progressExecuter }
         set { protectedState.write { $0.progressExecuter = newValue } }
     }
-
+    
     internal var successExecuter: Executer<TaskType>? {
         get { protectedState.wrappedValue.successExecuter }
         set { protectedState.write { $0.successExecuter = newValue } }
     }
-
+    
     internal var failureExecuter: Executer<TaskType>? {
         get { protectedState.wrappedValue.failureExecuter }
         set { protectedState.write { $0.failureExecuter = newValue } }
     }
-
+    
     internal var completionExecuter: Executer<TaskType>? {
         get { protectedState.wrappedValue.completionExecuter }
         set { protectedState.write { $0.completionExecuter = newValue } }
@@ -223,14 +223,14 @@ public class TiercelTask<TaskType>: NSObject, Codable {
         get { protectedState.wrappedValue.controlExecuter }
         set { protectedState.write { $0.controlExecuter = newValue } }
     }
-
+    
     internal var validateExecuter: Executer<TaskType>? {
         get { protectedState.wrappedValue.validateExecuter }
         set { protectedState.write { $0.validateExecuter = newValue } }
     }
-
-
-
+    
+    
+    
     internal init(_ url: URL,
                   headers: [String: String]? = nil,
                   cache: Cache,
@@ -277,7 +277,7 @@ public class TiercelTask<TaskType>: NSObject, Codable {
         cache = decoder.userInfo[.cache] as? Cache ?? Cache("default")
         operationQueue = decoder.userInfo[.operationQueue] as? DispatchQueue ?? DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
-
+        
         progress.totalUnitCount = try container.decode(Int64.self, forKey: .totalBytes)
         progress.completedUnitCount = try container.decode(Int64.self, forKey: .completedBytes)
         
@@ -302,7 +302,7 @@ public class TiercelTask<TaskType>: NSObject, Codable {
             }
         }
     }
-
+    
     internal func execute(_ Executer: Executer<TaskType>?) {
         
     }
@@ -316,7 +316,7 @@ extension TiercelTask {
         progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         return self
     }
-
+    
     @discardableResult
     public func success(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
         successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
@@ -326,17 +326,17 @@ extension TiercelTask {
             }
         }
         return self
-
+        
     }
-
+    
     @discardableResult
     public func failure(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
         failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if completionExecuter == nil &&
             (status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .failed) {
+             status == .canceled ||
+             status == .removed ||
+             status == .failed) {
             operationQueue.async {
                 self.execute(self.failureExecuter)
             }

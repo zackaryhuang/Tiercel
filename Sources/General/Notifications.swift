@@ -27,15 +27,15 @@
 import Foundation
 
 public extension DownloadTask {
-
+    
     static let runningNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.running")
     static let didCompleteNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.didComplete")
     static let statusDidChangeNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.statusDidChange")
- 
+    
 }
 
 public extension SessionManager {
-
+    
     static let runningNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.sessionManager.running")
     static let didCompleteNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.sessionManager.didComplete")
     
@@ -63,7 +63,7 @@ extension Notification {
 }
 
 extension NotificationCenter {
-
+    
     func postNotification(name: Notification.Name, downloadTask: DownloadTask) {
         let notification = Notification(name: name, downloadTask: downloadTask)
         post(notification)
@@ -79,5 +79,5 @@ extension String {
     
     fileprivate static let downloadTaskKey = "com.Tiercel.notification.key.downloadTask"
     fileprivate static let sessionManagerKey = "com.Tiercel.notification.key.sessionManagerKey"
-
+    
 }

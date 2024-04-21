@@ -37,7 +37,7 @@ public struct SessionConfiguration {
             return 3
         }
     }()
-
+    
     // 最大并发数
     private var _maxConcurrentTasksLimit: Int = MaxConcurrentTasksLimit
     public var maxConcurrentTasksLimit: Int {
@@ -47,17 +47,17 @@ public struct SessionConfiguration {
             _maxConcurrentTasksLimit = max(limit, 1)
         }
     }
-        
+    
     public var allowsExpensiveNetworkAccess: Bool = true
-
-
+    
+    
     public var allowsConstrainedNetworkAccess: Bool = true
-
+    
     // 是否允许蜂窝网络下载
     public var allowsCellularAccess: Bool = false
-
+    
     public init() {
-
+        
     }
 }
 

@@ -37,7 +37,7 @@ extension TiercelWrapper where Base: FileManager {
             }
         } else {
             if let systemAttributes = try? base.attributesOfFileSystem(forPath: NSHomeDirectory()),
-                let freeSpace = (systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber)?.int64Value {
+               let freeSpace = (systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber)?.int64Value {
                 return freeSpace
             } else {
                 return 0

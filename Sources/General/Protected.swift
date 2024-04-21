@@ -30,32 +30,32 @@ import Foundation
 
 final public class UnfairLock {
     private let unfairLock: os_unfair_lock_t
-
+    
     public init() {
         
         unfairLock = .allocate(capacity: 1)
         unfairLock.initialize(to: os_unfair_lock())
     }
-
+    
     deinit {
         unfairLock.deinitialize(count: 1)
         unfairLock.deallocate()
     }
-
+    
     private func lock() {
         os_unfair_lock_lock(unfairLock)
     }
-
+    
     private func unlock() {
         os_unfair_lock_unlock(unfairLock)
     }
-
-
+    
+    
     public func around<T>(_ closure: () throws -> T) rethrows -> T {
         lock(); defer { unlock() }
         return try closure()
     }
-
+    
     public func around(_ closure: () throws -> Void) rethrows -> Void {
         lock(); defer { unlock() }
         return try closure()
@@ -75,8 +75,8 @@ final public class Protected<T> {
     }
     
     public var projectedValue: Protected<T> { self }
-
-
+    
+    
     public init(_ value: T) {
         self.value = value
     }
@@ -84,12 +84,12 @@ final public class Protected<T> {
     public init(wrappedValue: T) {
         value = wrappedValue
     }
-
+    
     public func read<U>(_ closure: (T) throws -> U) rethrows -> U {
         return try lock.around { try closure(self.value) }
     }
-
-
+    
+    
     @discardableResult
     public func write<U>(_ closure: (inout T) throws -> U) rethrows -> U {
         return try lock.around { try closure(&self.value) }

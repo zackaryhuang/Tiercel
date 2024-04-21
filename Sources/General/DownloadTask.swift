@@ -25,9 +25,9 @@
 //
 
 #if os(OSX)
-    import AppKit
+import AppKit
 #elseif os(iOS)
-    import UIKit
+import UIKit
 #endif
 
 public class DownloadTask: TiercelTask<DownloadTask> {
@@ -36,7 +36,7 @@ public class DownloadTask: TiercelTask<DownloadTask> {
         case resumeData
         case response
     }
-
+    
     private var acceptableStatusCodes: Range<Int> { return 200..<300 }
     
     private var _sessionTask: URLSessionDownloadTask? {
@@ -53,23 +53,23 @@ public class DownloadTask: TiercelTask<DownloadTask> {
         set { protectedDownloadState.write { _ in _sessionTask = newValue }}
     }
     
-
+    
     public private(set) var response: HTTPURLResponse? {
         get { protectedDownloadState.wrappedValue.response }
         set { protectedDownloadState.write { $0.response = newValue } }
     }
     
-
+    
     public var filePath: String {
         return cache.filePath(fileName: fileName)!
     }
-
+    
     public var pathExtension: String? {
         let pathExtension = (filePath as NSString).pathExtension
         return pathExtension.isEmpty ? nil : pathExtension
     }
-
-
+    
+    
     private struct DownloadState {
         var resumeData: Data? {
             didSet {
@@ -93,13 +93,13 @@ public class DownloadTask: TiercelTask<DownloadTask> {
     internal var tmpFileName: String? {
         protectedDownloadState.wrappedValue.tmpFileName
     }
-
+    
     private var shouldValidateFile: Bool {
         get { protectedDownloadState.wrappedValue.shouldValidateFile }
         set { protectedDownloadState.write { $0.shouldValidateFile = newValue } }
     }
-
-
+    
+    
     internal init(_ url: URL,
                   headers: [String: String]? = nil,
                   fileName: String? = nil,
@@ -112,12 +112,12 @@ public class DownloadTask: TiercelTask<DownloadTask> {
         if let fileName = fileName, !fileName.isEmpty {
             self.fileName = fileName
         }
-        #if os(iOS)
+#if os(iOS)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(fixDelegateMethodError),
                                                name: UIApplication.didBecomeActiveNotification,
                                                object: nil)
-        #endif
+#endif
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -162,19 +162,19 @@ public class DownloadTask: TiercelTask<DownloadTask> {
             self.sessionTask?.resume()
         }
     }
-
-
+    
+    
     internal override func execute(_ executer: Executer<DownloadTask>?) {
         executer?.execute(self)
     }
     
-
+    
 }
 
 
 // MARK: - control
 extension DownloadTask {
-
+    
     internal func download() {
         cache.createDirectory()
         guard let manager = manager else { return }
@@ -206,19 +206,19 @@ extension DownloadTask {
         protectedState.write {
             $0.speed = 0
             if $0.startDate == 0 {
-                 $0.startDate = Date().timeIntervalSince1970
+                $0.startDate = Date().timeIntervalSince1970
             }
         }
         error = nil
         response = nil
         start(fileExists: fileExists)
     }
-
+    
     private func start(fileExists: Bool) {
         if fileExists {
             manager?.log(.downloadTask("file already exists", task: self))
             if let fileInfo = try? FileManager.default.attributesOfItem(atPath: cache.filePath(fileName: fileName)!),
-                let length = fileInfo[.size] as? Int64 {
+               let length = fileInfo[.size] as? Int64 {
                 progress.totalUnitCount = length
             }
             executeControl()
@@ -227,7 +227,7 @@ extension DownloadTask {
             }
         } else {
             if let resumeData = resumeData,
-                cache.retrieveTmpFile(tmpFileName) {
+               cache.retrieveTmpFile(tmpFileName) {
                 sessionTask = session?.downloadTask(withResumeData: resumeData)
             } else {
                 var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
@@ -245,8 +245,8 @@ extension DownloadTask {
             executeControl()
         }
     }
-
-
+    
+    
     internal func suspend(onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         guard status == .running || status == .waiting else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
@@ -260,7 +260,7 @@ extension DownloadTask {
             }
         }
     }
-
+    
     internal func cancel(onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         guard status != .succeeded else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
@@ -274,9 +274,9 @@ extension DownloadTask {
             }
         }
     }
-
     
-
+    
+    
     internal func remove(completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         isRemoveCompletely = completely
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
@@ -290,8 +290,8 @@ extension DownloadTask {
             }
         }
     }
-
-
+    
+    
     internal func update(_ newHeaders: [String: String]? = nil, newFileName: String? = nil) {
         headers = newHeaders
         if let newFileName = newFileName, !newFileName.isEmpty {
@@ -299,17 +299,17 @@ extension DownloadTask {
             fileName = newFileName
         }
     }
-
+    
     private func validateFile() {
         guard let validateHandler = self.validateExecuter else { return }
-
+        
         if !shouldValidateFile {
             validateHandler.execute(self)
             return
         }
-
+        
         guard let verificationCode = verificationCode else { return }
-
+        
         FileChecksumHelper.validateFile(filePath, code: verificationCode, type: verificationType) { [weak self] (result) in
             guard let self = self else { return }
             self.shouldValidateFile = false
@@ -324,14 +324,14 @@ extension DownloadTask {
             validateHandler.execute(self)
         }
     }
-
+    
 }
 
 
 
 // MARK: - status handle
 extension DownloadTask {
-
+    
     private func didCancelOrRemove() {
         // 把预操作的状态改成完成操作的状态
         if status == .willCancel {
@@ -344,8 +344,8 @@ extension DownloadTask {
         
         manager?.didCancelOrRemove(self)
     }
-
-
+    
+    
     internal func succeeded(fromRunning: Bool, immediately: Bool) {
         if endDate == 0 {
             protectedState.write {
@@ -357,7 +357,7 @@ extension DownloadTask {
         progress.completedUnitCount = progress.totalUnitCount
         progressExecuter?.execute(self)
         if immediately {
-          executeCompletion(true)
+            executeCompletion(true)
         }
         validateFile()
         manager?.maintainTasks(with: .succeeded(self))
@@ -418,10 +418,10 @@ extension DownloadTask {
                              type: FileChecksumHelper.VerificationType,
                              onMainQueue: Bool = true,
                              handler: @escaping Handler<DownloadTask>) -> Self {
-         operationQueue.async {
+        operationQueue.async {
             let (verificationCode, verificationType) = self.protectedState.read {
-                                                            ($0.verificationCode, $0.verificationType)
-                                                        }
+                ($0.verificationCode, $0.verificationType)
+            }
             if verificationCode == code &&
                 verificationType == type &&
                 self.validation != .unknown {
@@ -473,20 +473,20 @@ extension DownloadTask {
 
 // MARK: - info
 extension DownloadTask {
-
+    
     internal func updateSpeedAndTimeRemaining() {
-
+        
         let dataCount = progress.completedUnitCount
         let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
-
+        
         if dataCount > lastData {
             let speed = dataCount - lastData
             updateTimeRemaining(speed)
         }
         progress.setUserInfoObject(dataCount, forKey: .fileCompletedCountKey)
-
+        
     }
-
+    
     private func updateTimeRemaining(_ speed: Int64) {
         var timeRemaining: Double
         if speed != 0 {
@@ -518,11 +518,11 @@ extension DownloadTask {
     
     internal func didFinishDownloading(task: URLSessionDownloadTask, to location: URL) {
         guard let statusCode = (task.response as? HTTPURLResponse)?.statusCode,
-            acceptableStatusCodes.contains(statusCode)
-            else { return }
+              acceptableStatusCodes.contains(statusCode)
+        else { return }
         cache.storeFile(at: location, to: URL(fileURLWithPath: filePath))
         cache.removeTmpFile(tmpFileName)
-
+        
     }
     
     internal func didComplete(_ type: CompletionType) {
@@ -541,7 +541,7 @@ extension DownloadTask {
         case let .network(task, error):
             manager?.maintainTasks(with: .removeRunningTasks(self))
             sessionTask = nil
-
+            
             switch status {
             case .willCancel, .willRemove:
                 determineStatus(with: .manual(true))
@@ -569,7 +569,7 @@ extension DownloadTask {
             }
         }
     }
-
+    
 }
 
 
@@ -580,19 +580,19 @@ extension Array where Element == DownloadTask {
         self.forEach { $0.progress(onMainQueue: onMainQueue, handler: handler) }
         return self
     }
-
+    
     @discardableResult
     public func success(onMainQueue: Bool = true, handler: @escaping Handler<DownloadTask>) -> [Element] {
         self.forEach { $0.success(onMainQueue: onMainQueue, handler: handler) }
         return self
     }
-
+    
     @discardableResult
     public func failure(onMainQueue: Bool = true, handler: @escaping Handler<DownloadTask>) -> [Element] {
         self.forEach { $0.failure(onMainQueue: onMainQueue, handler: handler) }
         return self
     }
-
+    
     public func validateFile(codes: [String],
                              type: FileChecksumHelper.VerificationType,
                              onMainQueue: Bool = true,

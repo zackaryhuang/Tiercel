@@ -28,7 +28,7 @@ import Foundation
 
 internal class SessionDelegate: NSObject {
     internal weak var manager: SessionManager?
-
+    
 }
 
 
@@ -49,7 +49,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
         guard let task = manager.mapTask(currentURL) else {
             manager.log(.error("urlSession(_:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:)",
                                error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
-                        )
+            )
             return
         }
         task.didWriteData(downloadTask: downloadTask, bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
@@ -78,7 +78,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
         } else {
             if let error = error {
                 if let urlError = error as? URLError,
-                    let errorURL = urlError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
+                   let errorURL = urlError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
                     guard let downloadTask = manager.mapTask(errorURL) else {
                         manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: TiercelError.fetchDownloadTaskFailed(url: errorURL)))
                         manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: error))

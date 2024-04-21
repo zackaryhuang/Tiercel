@@ -38,7 +38,7 @@ public class SessionManager {
         case appendRunningTasks(DownloadTask)
         case removeRunningTasks(DownloadTask)
     }
-
+    
     public let operationQueue: DispatchQueue
     
     public let cache: Cache
@@ -46,7 +46,7 @@ public class SessionManager {
     public let identifier: String
     
     public var completionHandler: (() -> Void)?
-
+    
     public var configuration: SessionConfiguration {
         get { protectedState.wrappedValue.configuration }
         set {
@@ -102,7 +102,7 @@ public class SessionManager {
     
     
     private let protectedState: Protected<State>
-
+    
     public var logger: Logable {
         get { protectedState.wrappedValue.logger }
         set { protectedState.write { $0.logger = newValue } }
@@ -113,7 +113,7 @@ public class SessionManager {
         set { protectedState.write { $0.isControlNetworkActivityIndicator = newValue } }
     }
     
-
+    
     internal var shouldRun: Bool {
         return runningTasks.count < configuration.maxConcurrentTasksLimit
     }
@@ -127,13 +127,13 @@ public class SessionManager {
         get { protectedState.wrappedValue.shouldCreateSession }
         set { protectedState.write { $0.shouldCreateSession = newValue } }
     }
-
+    
     
     private var timer: DispatchSourceTimer? {
         get { protectedState.wrappedValue.timer }
         set { protectedState.write { $0.timer = newValue } }
     }
-
+    
     
     public private(set) var status: Status {
         get { protectedState.wrappedValue.status }
@@ -161,24 +161,24 @@ public class SessionManager {
         get { protectedState.wrappedValue.restartTasks }
         set { protectedState.write { $0.restartTasks = newValue } }
     }
-
+    
     public private(set) var succeededTasks: [DownloadTask] {
         get { protectedState.wrappedValue.succeededTasks }
         set { protectedState.write { $0.succeededTasks = newValue } }
     }
-
+    
     private let _progress = Progress()
     public var progress: Progress {
         _progress.completedUnitCount = tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
         _progress.totalUnitCount = tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
         return _progress
     }
-
+    
     public private(set) var speed: Int64 {
         get { protectedState.wrappedValue.speed }
         set { protectedState.write { $0.speed = newValue } }
     }
-
+    
     public var speedString: String {
         speed.tr.convertSpeedToString()
     }
@@ -188,7 +188,7 @@ public class SessionManager {
         get { protectedState.wrappedValue.timeRemaining }
         set { protectedState.write { $0.timeRemaining = newValue } }
     }
-
+    
     public var timeRemainingString: String {
         timeRemaining.tr.convertTimeToString()
     }
@@ -217,7 +217,7 @@ public class SessionManager {
         get { protectedState.wrappedValue.controlExecuter }
         set { protectedState.write { $0.controlExecuter = newValue } }
     }
-
+    
     
     
     public init(_ identifier: String,
@@ -255,15 +255,15 @@ public class SessionManager {
     deinit {
         invalidate()
     }
-
+    
     public func invalidate() {
         session?.invalidateAndCancel()
         session = nil
         cache.invalidate()
         invalidateTimer()
     }
-
-
+    
+    
     private func createSession(_ completion: (() -> ())? = nil) {
         guard shouldCreateSession else { return }
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
@@ -334,10 +334,10 @@ extension SessionManager {
             log(.error("create dowloadTask failed", error: error))
             return nil
         }
-
+        
     }
     
-
+    
     /// 批量开启多个下载任务, 所有任务都会并发下载
     ///
     /// - Parameters:
@@ -352,25 +352,25 @@ extension SessionManager {
                               onMainQueue: Bool = true,
                               handler: Handler<SessionManager>? = nil) -> [DownloadTask] {
         if let headersArray = headersArray,
-            headersArray.count != 0 && headersArray.count != urls.count {
+           headersArray.count != 0 && headersArray.count != urls.count {
             log(.error("create multiple dowloadTasks failed", error: TiercelError.headersMatchFailed))
             return [DownloadTask]()
         }
         
         if let fileNames = fileNames,
-            fileNames.count != 0 && fileNames.count != urls.count {
+           fileNames.count != 0 && fileNames.count != urls.count {
             log(.error("create multiple dowloadTasks failed", error: TiercelError.fileNamesMatchFailed))
             return [DownloadTask]()
         }
-
+        
         var urlSet = Set<URL>()
         var uniqueTasks = [DownloadTask]()
-
+        
         operationQueue.sync {
             for (index, url) in urls.enumerated() {
                 let fileName = fileNames?.safeObject(at: index)
                 let headers = headersArray?.safeObject(at: index)
-
+                
                 guard let validURL = try? url.asURL() else {
                     log(.error("create dowloadTask failed", error: TiercelError.invalidURL(url: url)))
                     continue
@@ -379,7 +379,7 @@ extension SessionManager {
                     log(.error("create dowloadTask failed", error: TiercelError.duplicateURL(url: url)))
                     continue
                 }
-
+                
                 var task: DownloadTask!
                 task = fetchTask(validURL)
                 if let task = task {
@@ -429,7 +429,7 @@ extension SessionManager {
             return $0.taskMapper[url.absoluteString]
         }
     }
-
+    
     
     
     /// 开启任务
@@ -471,7 +471,7 @@ extension SessionManager {
             }
         }
     }
-
+    
     
     /// 暂停任务，会触发sessionDelegate的完成回调
     public func suspend(_ url: URLConvertible, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
@@ -554,7 +554,7 @@ extension SessionManager {
             let range = (0..<tasks.count)
             guard range.contains(sourceIndex) && range.contains(destinationIndex) else {
                 log(.error("move task failed, sourceIndex: \(sourceIndex), destinationIndex: \(destinationIndex)",
-                                error: TiercelError.indexOutOfRange))
+                           error: TiercelError.indexOutOfRange))
                 return
             }
             if sourceIndex == destinationIndex {
@@ -623,9 +623,9 @@ extension SessionManager {
 
 // MARK: - status handle
 extension SessionManager {
-
+    
     internal func maintainTasks(with action: MaintainTasksAction) {
-
+        
         switch action {
         case let .append(task):
             protectedState.write { state in
@@ -675,7 +675,7 @@ extension SessionManager {
             }
         }
     }
-
+    
     internal func updateUrlMapper(with task: DownloadTask) {
         protectedState.write { $0.urlMapper[task.currentURL] = task.url }
     }
@@ -688,8 +688,8 @@ extension SessionManager {
             guard let self = self else { return }
             downloadTasks.forEach { downloadTask in
                 if downloadTask.state == .running,
-                    let currentURL = downloadTask.currentRequest?.url,
-                    let task = self.mapTask(currentURL) {
+                   let currentURL = downloadTask.currentRequest?.url,
+                   let task = self.mapTask(currentURL) {
                     self.didStart()
                     self.maintainTasks(with: .appendRunningTasks(task))
                     task.status = .running
@@ -709,9 +709,9 @@ extension SessionManager {
         
         let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
         let isCompleted = isSucceeded ? isSucceeded :
-                                        self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+        self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
         guard isCompleted else { return false }
-
+        
         if status == .succeeded || status == .failed {
             return true
         }
@@ -722,11 +722,11 @@ extension SessionManager {
         return true
     }
     
-
-
+    
+    
     private func shouldSuspend() {
         let isSuspended = tasks.allSatisfy { $0.status == .suspended || $0.status == .succeeded || $0.status == .failed }
-
+        
         if isSuspended {
             if status == .suspended {
                 return
@@ -752,9 +752,9 @@ extension SessionManager {
     internal func updateProgress() {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
-                #if os(iOS)
+#if os(iOS)
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
-                #endif
+#endif
             }
         }
         progressExecuter?.execute(self)
@@ -774,7 +774,7 @@ extension SessionManager {
             }
         }
     }
-
+    
     internal func storeTasks() {
         cache.storeTasks(tasks)
     }
@@ -782,12 +782,12 @@ extension SessionManager {
     internal func determineStatus(fromRunningTask: Bool) {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
-                #if os(iOS)
+#if os(iOS)
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                #endif
+#endif
             }
         }
-
+        
         // removed
         if status == .willRemove {
             if tasks.isEmpty {
@@ -828,9 +828,9 @@ extension SessionManager {
         
         // suspended
         let isSuspended = tasks.allSatisfy { $0.status == .suspended ||
-                                             $0.status == .succeeded ||
-                                             $0.status == .failed }
-
+            $0.status == .succeeded ||
+            $0.status == .failed }
+        
         if isSuspended {
             if status == .suspended {
                 storeTasks()
@@ -876,9 +876,9 @@ extension SessionManager {
 
 // MARK: - info
 extension SessionManager {
-
+    
     static let refreshInterval: Double = 1
-
+    
     private func createTimer() {
         if timer == nil {
             timer = DispatchSource.makeTimerSource(flags: .strict, queue: operationQueue)
@@ -890,12 +890,12 @@ extension SessionManager {
             timer?.resume()
         }
     }
-
+    
     private func invalidateTimer() {
         timer?.cancel()
         timer = nil
     }
-
+    
     internal func updateSpeedAndTimeRemaining() {
         let speed = runningTasks.reduce(Int64(0), {
             $1.updateSpeedAndTimeRemaining()
@@ -919,9 +919,9 @@ extension SessionManager {
             $0.timeRemaining = Int64(timeRemaining)
         }
     }
-
-
-
+    
+    
+    
     internal func log(_ type: LogType) {
         logger.log(type)
     }
@@ -951,9 +951,9 @@ extension SessionManager {
         failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if completionExecuter == nil &&
             (status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .failed) {
+             status == .canceled ||
+             status == .removed ||
+             status == .failed) {
             operationQueue.async {
                 self.failureExecuter?.execute(self)
             }

@@ -82,7 +82,7 @@ public enum Status: String {
     case failed
     case removed
     case succeeded
-
+    
     case willSuspend
     case willCancel
     case willRemove
@@ -97,7 +97,7 @@ public struct TiercelWrapper<Base> {
 
 
 public protocol TiercelCompatible {
-
+    
 }
 
 extension TiercelCompatible {
