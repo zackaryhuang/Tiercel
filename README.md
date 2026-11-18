@@ -172,6 +172,19 @@ configuration.allowsExpensiveNetworkAccess = true
 let manager = SessionManager("downloads", configuration: configuration)
 ```
 
+For self-signed HTTPS download servers, explicitly opt in before creating the manager:
+
+```swift
+configuration.allowsInvalidServerCertificates = true
+let manager = SessionManager("nas-downloads", configuration: configuration)
+```
+
+This defaults to `false`. Enabling it accepts any server certificate for this session,
+including expired certificates and certificates with mismatched hostnames. It disables
+server identity verification, so use a dedicated manager for trusted servers only.
+Other authentication challenges still use system default handling. ATS and TLS protocol
+requirements still apply.
+
 You can also validate downloaded files when integrity matters:
 
 ```swift

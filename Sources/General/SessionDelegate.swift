@@ -46,6 +46,8 @@ class SessionDelegate: NSObject {
     
     weak var stateProvider: SessionStateProvider?
 
+    var allowsInvalidServerCertificates: Bool = false
+
     func task<TaskType, R: Task<TaskType>>(for url: URL, as type: R.Type) -> R? {
         guard let provider = stateProvider else {
             return nil
@@ -72,6 +74,22 @@ class SessionDelegate: NSObject {
 
 
 extension SessionDelegate: URLSessionDownloadDelegate {
+    public func urlSession(
+        _ session: URLSession,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        guard allowsInvalidServerCertificates,
+              challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+
+        completionHandler(.useCredential, URLCredential(trust: serverTrust))
+    }
+
+
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
         stateProvider?.didBecomeInvalidation(withError: error)
     }

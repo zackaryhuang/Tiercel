@@ -265,8 +265,10 @@ public class SessionManager {
     private func createSession() {
         dispatchPrecondition(condition: .onQueue(operationQueue))
         guard shouldCreatSession else { return }
+        let sessionDelegate = SessionDelegate()
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
         mutableState.read { state in
+            sessionDelegate.allowsInvalidServerCertificates = state.configuration.allowsInvalidServerCertificates
             sessionConfiguration.timeoutIntervalForRequest = state.configuration.timeoutIntervalForRequest
             sessionConfiguration.httpMaximumConnectionsPerHost = 100000
             sessionConfiguration.allowsCellularAccess = state.configuration.allowsCellularAccess
@@ -275,7 +277,6 @@ public class SessionManager {
                 sessionConfiguration.allowsExpensiveNetworkAccess = state.configuration.allowsExpensiveNetworkAccess
             }
         }
-        let sessionDelegate = SessionDelegate()
         sessionDelegate.stateProvider = self
         let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1,
                                            underlyingQueue: operationQueue,

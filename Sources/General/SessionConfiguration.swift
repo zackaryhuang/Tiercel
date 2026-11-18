@@ -50,6 +50,11 @@ public struct SessionConfiguration {
     // 是否允许蜂窝网络下载
     public var allowsCellularAccess: Bool = false
 
+    /// Accepts any server certificate, including self-signed or expired certificates.
+    /// Defaults to false. Enable only for trusted download servers; this disables
+    /// server identity verification for every HTTPS request in this session.
+    public var allowsInvalidServerCertificates: Bool = false
+
     public init() {
 
     }

@@ -172,6 +172,17 @@ configuration.allowsExpensiveNetworkAccess = true
 let manager = SessionManager("downloads", configuration: configuration)
 ```
 
+对于使用自签名 HTTPS 证书的下载服务器，在创建 manager 前显式开启：
+
+```swift
+configuration.allowsInvalidServerCertificates = true
+let manager = SessionManager("nas-downloads", configuration: configuration)
+```
+
+此选项默认为 `false`。开启后，该会话会接受任意服务器证书，包括过期证书和主机名不匹配的证书。
+这会关闭服务器身份校验，请仅为可信服务器使用独立的 manager。其他认证挑战仍由系统默认处理，
+ATS 和 TLS 协议要求仍然适用。
+
 当你需要保证文件完整性时，也可以在下载完成后进行校验：
 
 ```swift
